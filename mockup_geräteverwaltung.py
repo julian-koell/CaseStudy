@@ -45,7 +45,7 @@ with tab1:
                 "responsible_person": responsible_person,
                  "end_of_life" : end_of_life
             })
-            st.success("Änderungen wurden im Session State aktualisiert (Mock-Up).")
+            st.success("Änderungen wurden im Session State aktualisiert.")
     
 # Gerät anlegen
 with tab2:
@@ -72,4 +72,4 @@ with tab2:
                 "responsible_person": responsible_person,
                 "end_of_life" : end_of_life
             }
-            st.success("Gerät wurde (im Mock-Up) angelegt und als aktuelles Gerät gespeichert.")
+            st.success("Gerät wurde angelegt.")

@@ -1,3 +1,7 @@
+# Mock-UP Geräteverwaltung
+!("Screenshots\Mockup Geräteverwaltung Gerät ändern.png")
+!("Screenshots\Mockup Geräteverwaltung neues Gerät.png")
+
 # Case Study
 
 - See instructions in the lecture notes
