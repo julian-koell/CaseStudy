@@ -1,6 +1,6 @@
 # Mock-UP Geräteverwaltung
-![Gerät ändern](Screenshots/Mockup%Geräteverwaltung%Gerät%ändern.png)
-![Gerät anlegen](Screenshots/Mockup%Geräteverwaltung%neues%Gerät.png)
+![Gerät ändern](Screenshots\mockup_geraet_aendern.png)
+![Gerät anlegen](Screenshots\mockup_geraet_anlegen.png)
 
 # Case Study
 
