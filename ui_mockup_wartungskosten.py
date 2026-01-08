@@ -1,36 +1,95 @@
 import streamlit as st
+from user import User, init_db
 
-if "sb_current_device" not in st.session_state:
-    st.session_state.sb_current_device = ""
+st.set_page_config(page_title="Verwaltungssystem", layout="wide")
+init_db()
 
-# Eine Überschrift der ersten Ebene
-st.write("# Wartungsmanagement")
+st.title("Verwaltungssystem")
+st.caption("Administrator-Oberfläche")
 
-# Eine Überschrift der zweiten Ebene
-st.write("## Geräteauswahl")
 
-# Eine Auswahlbox mit hard-gecoded Optionen, das Ergebnis
+# Geräte
 
-st.session_state.sb_current_device = st.selectbox(label='Gerät auswählen',
-        options = ["Gerät_A", "Gerät_B"])
+if "current_device" not in st.session_state:
+    st.session_state.current_device = {
+        "name": "Demo-Gerät",
+        "responsible_person": "Admin",
+        "id": "NR-0001",
+        "end_of_life": "20.10.2027"
+    }
 
-st.write(f"Das ausgewählte Gerät ist {st.session_state.sb_current_device}")
 
-#UI ELEMENTE BEISPIEL
-st.write("## Wartungskosten")
+# HAUPT-TABS
 
-# Callbacks for the number inputs
-def update_price_from_euro():
-    st.session_state.price_dollar = st.session_state.price_euro * 1.1
+tab_devices, tab_users = st.tabs(["Geräte-Verwaltung", "Nutzer-Verwaltung"])
 
-def update_price_from_dollar():
-    st.session_state.price_euro = st.session_state.price_dollar * 0.9
 
-# Number inputs for the maintenance costs
-st.number_input(label="Wartungskosten in Euro", 
-                            key = "price_euro",
-                            on_change=update_price_from_euro)
+# GERÄTE-VERWALTUNG
 
-st.number_input(label="Wartungskosten in Dollar", 
-                            key = "price_dollar",
-                            on_change=update_price_from_dollar)
+with tab_devices:
+    st.header("Geräte-Verwaltung")
+    st.caption("Geräte ändern oder neu anlegen")
+
+    tab1, tab2 = st.tabs(["Gerät ändern", "Neues Gerät"])
+
+    with tab1:
+        st.subheader("Gerät ändern")
+
+        st.selectbox(
+            label="Gerät auswählen",
+            options=["Gerät_A", "Gerät_B"],
+            key="sb_current_device"
+        )
+
+        aktuelles_geraet = st.session_state.current_device
+
+        with st.form("geraet_aendern_form"):
+            col1, col2 = st.columns(2)
+
+            with col1:
+                id = st.text_input("ID-Nummer", value=aktuelles_geraet["id"])
+                responsible_person = st.text_input(
+                    "Verantwortlicher",
+                    value=aktuelles_geraet["responsible_person"]
+                )
+
+            with col2:
+                name = st.text_input("Gerätename", value=aktuelles_geraet["name"])
+                end_of_life = st.text_input(
+                    "Ende Lebenszyklus",
+                    value=aktuelles_geraet["end_of_life"]
+                )
+
+            if st.form_submit_button("Änderungen speichern"):
+                st.session_state.current_device.update({
+                    "name": name,
+                    "id": id,
+                    "responsible_person": responsible_person,
+                    "end_of_life": end_of_life
+                })
+                st.success("Gerät wurde aktualisiert.")
+
+    with tab2:
+        st.subheader("Neues Gerät anlegen")
+
+        with st.form("geraet_anlegen_form"):
+            col1, col2 = st.columns(2)
+
+            with col1:
+                id = st.text_input("ID-Nummer")
+                responsible_person = st.text_input("Verantwortlicher")
+
+            with col2:
+                name = st.text_input("Gerätename")
+                end_of_life = st.text_input("Ende Lebenszyklus")
+
+            if st.form_submit_button("Gerät anlegen"):
+                st.session_state.current_device = {
+                    "name": name,
+                    "id": id,
+                    "responsible_person": responsible_person,
+                    "end_of_life": end_of_life
+                }
+                st.success("Gerät wurde angelegt.")
+
+
