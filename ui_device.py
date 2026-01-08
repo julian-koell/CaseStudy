@@ -1,45 +1,82 @@
 import streamlit as st
-from queries import find_devices
 from devices import Device
+from queries import find_devices
 
-# Eine Überschrift der ersten Ebene
-st.write("# Gerätemanagement")
+st.set_page_config(page_title="Geräte-Verwaltung", layout="wide")
 
-# Eine Überschrift der zweiten Ebene
-st.write("## Geräteauswahl")
+st.title("Geräte-Verwaltung")
+st.caption("Hier können Geräte geändert werden oder neue Geräte hinzugefügt werden.")
 
-# Eine Auswahlbox mit Datenbankabfrage, das Ergebnis wird in current_device gespeichert
-devices_in_db = find_devices()
 
-if devices_in_db:
+# Gerät ändern
+tab1, tab2 = st.tabs(["Gerät ändern","Neues Gerät"])
+with tab1:
+    st.header("Gerät ändern")
+
+    devices_in_db = find_devices()
+
     current_device_name = st.selectbox(
         'Gerät auswählen',
         options=devices_in_db, key="sbDevice")
 
-    if current_device_name in devices_in_db:
-        loaded_device = Device.find_by_attribute("device_name", current_device_name)
-        if loaded_device:
-            st.write(f"Loaded Device: {loaded_device}")
-        else:
-            st.error("Device not found in the database.")
+    loaded_device = Device.find_by_attribute("device_name", current_device_name)
+    if loaded_device:
+        st.write(f"Loaded Device: {loaded_device}")
+    else:
+        st.error("Device not found in the database.")
 
-        with st.form("Device"):
+    with st.form("Edit_Device"):
             st.write(loaded_device.device_name)
 
-            text_input_val = st.text_input("Geräte-Verantwortlicher", value=loaded_device.managed_by_user_id)
-            loaded_device.set_managed_by_user_id(text_input_val)
+            col1, col2 = st.columns(2)
+
+            with col1:
+                id = st.text_input("ID-Nummer", value=loaded_device.device_id)
+                responsible_person = st.text_input("Geräte-Verantwortlicher", value=loaded_device.managed_by_user_id)
+                loaded_device.set_managed_by_user_id(responsible_person)
+            
+            with col2:
+                end_of_life = st.text_input("Ende des Lebenszyklus", value=loaded_device.end_of_life)
 
             # Every form must have a submit button.
-            submitted = st.form_submit_button("Submit")
+            submitted = st.form_submit_button("Speichern")
             if submitted:
                 loaded_device.store_data()
-                st.write("Data stored.")
+                st.write("Änderungen gespeichert!")
                 st.rerun()
-    else:
-        st.error("Selected device is not in the database.")
-else:
-    st.write("No devices found.")
-    st.stop()
+    
+    deleted = st.button("Gerät löschen")
+    if deleted:
+         loaded_device.delete()
+         st.write("Gerät gelöscht!")
+         st.rerun()
+    
+# Gerät anlegen
+with tab2:
+    st.header("Neues Gerät anlegen")
 
-st.write("Session State:")
-st.session_state
+    with st.form("New_Device"):
+            st.write("Neues Gerät erstellen:")
+
+            name = st.text_input("Gerätename", value = None)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                id = st.text_input("ID-Nummer", value = None)
+                responsible_person = st.text_input("Geräte-Verantwortlicher", value = None)
+            
+            with col2:
+                end_of_life = st.text_input("Ende des Lebenszyklus", value = None)
+
+            # Every form must have a submit button.
+            submitted = st.form_submit_button("Erstellen")
+            if submitted:
+                new_device = Device(name,id,responsible_person,end_of_life)
+                new_device.store_data()
+                st.write("Neues Gerät erstellt!")
+                name = None
+                responsible_person = None
+                id = None
+                end_of_life = None
+                st.rerun()

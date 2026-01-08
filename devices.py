@@ -2,6 +2,7 @@ import os
 
 from tinydb import TinyDB, Query
 from serializer import serializer
+from datetime import datetime
 
 
 class Device():
@@ -9,12 +10,20 @@ class Device():
     db_connector = TinyDB(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.json'), storage=serializer).table('devices')
 
     # Constructor
-    def __init__(self, device_name : str, managed_by_user_id : str):
+    def __init__(self, device_name : str, device_id : int, managed_by_user_id : str, end_of_life : datetime):       
+        if device_id is None or device_name is None or managed_by_user_id is None or end_of_life is None:
+            raise ValueError("Alle Pflichtattribute müssen ausgefüllt sein!")    
+
         self.device_name = device_name
+        self.device_id = device_id
+        self.end_of_life = end_of_life
         # The user id of the user that manages the device
         # We don't store the user object itself, but only the id (as a key)
         self.managed_by_user_id = managed_by_user_id
         self.is_active = True
+
+        self.__creation_date = datetime.now()
+        self.__last_update = datetime.now()
         
     # String representation of the class
     def __str__(self):
@@ -63,7 +72,7 @@ class Device():
 
         if result:
             data = result[:num_to_return]
-            device_results = [cls(d['device_name'], d['managed_by_user_id']) for d in data]
+            device_results = [cls(d['device_name'], d['device_id'], d['managed_by_user_id'], d['end_of_life']) for d in data]
             return device_results if num_to_return > 1 else device_results[0]
         else:
             return None
@@ -73,7 +82,7 @@ class Device():
         # Load all data from the database and create instances of the Device class
         devices = []
         for device_data in Device.db_connector.all():
-            devices.append(Device(device_data['device_name'], device_data['managed_by_user_id']))
+            devices.append(Device(device_data['device_name'], device_data['device_id'], device_data['managed_by_user_id'], device_data['end_of_life']))
         return devices
 
 
@@ -82,15 +91,15 @@ class Device():
 
 if __name__ == "__main__":
     # Create a device
-    device1 = Device("Device1", "one@mci.edu")
-    device2 = Device("Device2", "two@mci.edu") 
-    device3 = Device("Device3", "two@mci.edu") 
-    device4 = Device("Device4", "two@mci.edu") 
+    device1 = Device("Device1",1, "one@mci.edu",datetime(2026,2,20))
+    device2 = Device("Device2",2, "two@mci.edu",datetime(2026,6,20)) 
+    device3 = Device("Device3",3, "two@mci.edu",datetime(2027,2,20)) 
+    device4 = Device("Device4",4, "two@mci.edu",datetime(2027,6,20)) 
     device1.store_data()
     device2.store_data()
     device3.store_data()
     device4.store_data()
-    device5 = Device("Device3", "four@mci.edu") 
+    device5 = Device("Device3",5, "four@mci.edu", datetime(2026,6,20)) 
     device5.store_data()
 
     #loaded_device = Device.find_by_attribute("device_name", "Device2")
