@@ -1,5 +1,5 @@
 import streamlit as st
-from user import User, init_db
+from users import User, init_db
 
 st.set_page_config(page_title="Verwaltungssystem", layout="wide")
 init_db()
